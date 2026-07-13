@@ -7,8 +7,8 @@ import ChatAssistant from "./components/ChatAssistant";
 import BookingsList from "./components/BookingsList";
 import VillaDetailPage from "./components/VillaDetailPage";
 import { properties } from "./data/properties";
-import { villas } from "./data/villas";
 import { baliVillas } from "./data/baliVillas";
+import { italyVillas } from "./data/italyVillas";
 import { MessageSquare, MapPin, Compass, Search, Star } from "lucide-react";
 
 export default function App() {
@@ -150,13 +150,13 @@ export default function App() {
               </div>
             )}
 
-            {/* Lohono Villas Section */}
+            {/* Italy Collection Section */}
             <section className="section">
               <div className="section-header">
-                <h2 className="section-title">Lohono Luxury Villas</h2>
+                <h2 className="section-title">Italy Collection</h2>
               </div>
               <div className="properties-grid">
-                {villas.map(villa => (
+                {italyVillas.map(villa => (
                   <div
                     key={villa.id}
                     className="property-card"
@@ -176,13 +176,6 @@ export default function App() {
                         <span className="card-location">
                           <MapPin size={14} style={{ color: "var(--clr-gold)" }} /> {villa.location}
                         </span>
-                        {villa.rating && (
-                          <div className="rating-stars">
-                            {[...Array(5)].map((_, i) => (
-                              <Star key={i} size={14} fill={i < Math.floor(villa.rating) ? "currentColor" : "none"} stroke="currentColor" />
-                            ))}
-                          </div>
-                        )}
                       </div>
                       <h3 className="card-title">{villa.name}</h3>
                       <div className="card-amenities">
@@ -195,7 +188,7 @@ export default function App() {
                       <div className="card-footer">
                         <div className="card-price-container">
                           <span className="price-label">Starting From</span>
-                          <span className="price-val">₹{villa.priceINR.toLocaleString("en-IN")}</span>
+                          <span className="price-val">€{villa.priceEUR.toLocaleString("en-IE")}</span>
                           <span className="price-sub">/night</span>
                         </div>
                         <button className="view-property-btn">View Details</button>
