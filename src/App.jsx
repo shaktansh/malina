@@ -5,8 +5,10 @@ import PropertyCard from "./components/PropertyCard";
 import PropertyDetail from "./components/PropertyDetail";
 import ChatAssistant from "./components/ChatAssistant";
 import BookingsList from "./components/BookingsList";
+import VillaDetailPage from "./components/VillaDetailPage";
 import { properties } from "./data/properties";
-import { MessageSquare, MapPin, Compass, Search } from "lucide-react";
+import { villas } from "./data/villas";
+import { MessageSquare, MapPin, Compass, Search, Star } from "lucide-react";
 
 export default function App() {
   const [activeTab, setActiveTab] = useState("home");
@@ -17,6 +19,7 @@ export default function App() {
   
   // Drawer/Modal States
   const [selectedProperty, setSelectedProperty] = useState(null);
+  const [selectedVilla, setSelectedVilla] = useState(null);
   const [chatProperty, setChatProperty] = useState(null);
   const [showGeneralChat, setShowGeneralChat] = useState(false);
   const [mapHoveredPin, setMapHoveredPin] = useState(null);
@@ -82,6 +85,16 @@ export default function App() {
   const indiaProps = filteredProps.filter(p => p.category === "India Collection");
   const internationalProps = filteredProps.filter(p => p.category === "International Luxury");
 
+  // Full-page villa detail view takes over the entire screen
+  if (selectedVilla) {
+    return (
+      <VillaDetailPage
+        villa={selectedVilla}
+        onBack={() => setSelectedVilla(null)}
+      />
+    );
+  }
+
   return (
     <div className="app-container">
       {/* Header Section */}
@@ -135,6 +148,62 @@ export default function App() {
                 </button>
               </div>
             )}
+
+            {/* Lohono Villas Section */}
+            <section className="section">
+              <div className="section-header">
+                <h2 className="section-title">Lohono Luxury Villas</h2>
+              </div>
+              <div className="properties-grid">
+                {villas.map(villa => (
+                  <div
+                    key={villa.id}
+                    className="property-card"
+                    onClick={() => setSelectedVilla(villa)}
+                    style={{ cursor: "pointer" }}
+                  >
+                    <div className="card-image-container">
+                      <img src={villa.images[0].src} alt={villa.name} className="card-image" loading="lazy" />
+                      <div className="card-badge-container">
+                        {villa.tags.map((tag, i) => (
+                          <span key={i} className="card-badge badge-luxury">{tag}</span>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="card-content">
+                      <div className="card-meta">
+                        <span className="card-location">
+                          <MapPin size={14} style={{ color: "var(--clr-gold)" }} /> {villa.location}
+                        </span>
+                        {villa.rating && (
+                          <div className="rating-stars">
+                            {[...Array(5)].map((_, i) => (
+                              <Star key={i} size={14} fill={i < Math.floor(villa.rating) ? "currentColor" : "none"} stroke="currentColor" />
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                      <h3 className="card-title">{villa.name}</h3>
+                      <div className="card-amenities">
+                        <span>Upto {villa.guests} Guests</span>
+                        <span className="amenity-dot">•</span>
+                        <span>{villa.bedrooms} Bedrooms</span>
+                        <span className="amenity-dot">•</span>
+                        <span>{villa.bathrooms} Bathrooms</span>
+                      </div>
+                      <div className="card-footer">
+                        <div className="card-price-container">
+                          <span className="price-label">Starting From</span>
+                          <span className="price-val">₹{villa.priceINR.toLocaleString("en-IN")}</span>
+                          <span className="price-sub">/night</span>
+                        </div>
+                        <button className="view-property-btn">View Details</button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
 
             {/* India Collection Section */}
             {indiaProps.length > 0 && (
