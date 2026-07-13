@@ -47,7 +47,7 @@ export default function VillaDetailPage({ villa, onBack }) {
           <span>Back</span>
         </button>
         <span className="villa-page-breadcrumb">
-          Malina Holidays &rsaquo; India Collection &rsaquo; {villa.name}
+          Malina Holidays &rsaquo; {villa.type === "Bali Villas" ? "Bali Collection" : "India Collection"} &rsaquo; {villa.name}
         </span>
       </div>
 
@@ -299,7 +299,7 @@ export default function VillaDetailPage({ villa, onBack }) {
         <section className="villa-section villa-contact-section">
           <div className="villa-price-block">
             <span className="villa-price-label">Starting From</span>
-            <span className="villa-price-val">₹{formatPrice(villa.priceINR)}</span>
+            <span className="villa-price-val">{villa.currency === "USD" ? `${formatPrice(villa.priceUSD)}` : `₹${formatPrice(villa.priceINR)}`}</span>
             <span className="villa-price-sub">per night, excluding taxes</span>
           </div>
 
