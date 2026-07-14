@@ -47,7 +47,7 @@ export default function VillaDetailPage({ villa, onBack }) {
           <span>Back</span>
         </button>
         <span className="villa-page-breadcrumb">
-          Malina Holidays &rsaquo; {villa.type === "Bali Villas" ? "Bali Collection" : villa.type === "Italy Villas" ? "Italy Collection" : "India Collection"} &rsaquo; {villa.name}
+          Malina Holidays &rsaquo; {villa.type === "Bali Villas" ? "Bali Collection" : villa.type === "Italy Villas" ? "Italy Collection" : villa.type === "Coonoor Villas" ? "Coonoor Collection" : "India Collection"} &rsaquo; {villa.name}
         </span>
       </div>
 

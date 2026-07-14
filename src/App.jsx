@@ -9,6 +9,7 @@ import VillaDetailPage from "./components/VillaDetailPage";
 import { properties } from "./data/properties";
 import { baliVillas } from "./data/baliVillas";
 import { italyVillas } from "./data/italyVillas";
+import { coonoorVillas } from "./data/coonoorVillas";
 import { MessageSquare, MapPin, Compass, Search, Star } from "lucide-react";
 
 export default function App() {
@@ -238,6 +239,55 @@ export default function App() {
                         <div className="card-price-container">
                           <span className="price-label">Starting From</span>
                           <span className="price-val">${villa.priceUSD.toLocaleString("en-US")}</span>
+                          <span className="price-sub">/night</span>
+                        </div>
+                        <button className="view-property-btn">View Details</button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            {/* Coonoor Collection Section */}
+            <section className="section">
+              <div className="section-header">
+                <h2 className="section-title">Coonoor Collection</h2>
+              </div>
+              <div className="properties-grid">
+                {coonoorVillas.map(villa => (
+                  <div
+                    key={villa.id}
+                    className="property-card"
+                    onClick={() => setSelectedVilla(villa)}
+                    style={{ cursor: "pointer" }}
+                  >
+                    <div className="card-image-container">
+                      <img src={villa.images[0].src} alt={villa.name} className="card-image" loading="lazy" />
+                      <div className="card-badge-container">
+                        {villa.tags.map((tag, i) => (
+                          <span key={i} className="card-badge badge-luxury">{tag}</span>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="card-content">
+                      <div className="card-meta">
+                        <span className="card-location">
+                          <MapPin size={14} style={{ color: "var(--clr-gold)" }} /> {villa.location}
+                        </span>
+                      </div>
+                      <h3 className="card-title">{villa.name}</h3>
+                      <div className="card-amenities">
+                        <span>Upto {villa.guests} Guests</span>
+                        <span className="amenity-dot">•</span>
+                        <span>{villa.bedrooms} Bedrooms</span>
+                        <span className="amenity-dot">•</span>
+                        <span>{villa.bathrooms} Bathrooms</span>
+                      </div>
+                      <div className="card-footer">
+                        <div className="card-price-container">
+                          <span className="price-label">Starting From</span>
+                          <span className="price-val">₹{villa.priceINR.toLocaleString("en-IN")}</span>
                           <span className="price-sub">/night</span>
                         </div>
                         <button className="view-property-btn">View Details</button>
