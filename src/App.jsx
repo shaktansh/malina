@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Header from "./components/Header";
 import BottomNavbar from "./components/BottomNavbar";
 import PropertyCard from "./components/PropertyCard";
@@ -10,7 +10,90 @@ import { properties } from "./data/properties";
 import { baliVillas } from "./data/baliVillas";
 import { italyVillas } from "./data/italyVillas";
 import { coonoorVillas } from "./data/coonoorVillas";
-import { MessageSquare, MapPin, Compass, Search, Star } from "lucide-react";
+import { goaVillas } from "./data/goaVillas";
+import {
+  MessageSquare, MapPin, Compass, Star,
+  ChevronLeft, ChevronRight, Sparkles,
+  Shield, Heart, Waves, UtensilsCrossed, PawPrint
+} from "lucide-react";
+
+// ====== Goa Hero Banners (rotating) ======
+const GOA_BANNERS = [
+  {
+    script: "Goa",
+    headline: "Effortlessly",
+    subline: "Where the sea meets the soul — discover handpicked villas in Goa's most serene corners",
+    tag: "Heaven Experience",
+    image: "/images/WhatsApp_Image_2026-07-13_at_7.19.03_PM.jpeg",
+  },
+  {
+    script: "Bliss",
+    headline: "Discover the Beaches",
+    subline: "Wake up to the sound of waves in your private pool villa, steps from Goa's golden shores",
+    tag: "Beach Life",
+    image: "/images/WhatsApp_Image_2026-07-13_at_7.18.44_PM.jpeg",
+  },
+  {
+    script: "Welcome",
+    headline: "Pet-Friendly Stays",
+    subline: "Your furry family is welcome here — luxury villas that love pets as much as you do",
+    tag: "Pet Friendly",
+    image: "/images/WhatsApp_Image_2026-07-13_at_7.18.25_PM.jpeg",
+  },
+  {
+    script: "Restore",
+    headline: "Wellness Retreats",
+    subline: "Yoga, Ayurveda, and serene gardens — restore body and soul in Goa's finest wellness villas",
+    tag: "Wellness & Yoga",
+    image: "/images/WhatsApp_Image_2026-07-13_at_7.18.00_PM.jpeg",
+  },
+  {
+    script: "Heritage",
+    headline: "Portuguese Charm",
+    subline: "Step into living history — restored colonial mansions with every modern luxury inside",
+    tag: "Heritage Stays",
+    image: "/images/WhatsApp_Image_2026-07-13_at_7.19.03_PM.jpeg",
+  },
+];
+
+// ====== Stats Bar ======
+const STATS = [
+  { icon: Heart, value: "2 Lakh+", label: "Delighted Guests", color: "#e85d75" },
+  { icon: Star, value: "4.9/5", label: "Customer Rating", color: "#c5a880" },
+  { icon: Shield, value: "97%", label: "Satisfaction", color: "#3b9e6e" },
+];
+
+// ====== Experience Section ======
+const EXPERIENCES = [
+  { icon: Shield, label: "Vetted & Verified", desc: "Every villa personally inspected" },
+  { icon: Heart, label: "Personal Concierge", desc: "Dedicated support throughout your stay" },
+  { icon: Waves, label: "Private Pools", desc: "Exclusive pool in every villa" },
+  { icon: UtensilsCrossed, label: "In-Villa Dining", desc: "Chef on request, local cuisine" },
+  { icon: PawPrint, label: "Pet Friendly", desc: "Selected villas welcome your pets" },
+];
+
+// ====== Explore Malina Rows ======
+const DOMESTIC_DESTINATIONS = [
+  { name: "Goa", image: "/images/WhatsApp_Image_2026-07-13_at_7.19.03_PM.jpeg", target: "goa" },
+  { name: "Coonoor", image: `https://d3oo9u3p09egds.cloudfront.net/filters:quality(75)/1200x900/filters:format(webp)/rental_property/amani-villas-12a/DJI_0094-Edit.webp`, target: "coonoor" },
+];
+
+const INTERNATIONAL_DESTINATIONS = [
+  { name: "Bali", image: `https://d3oo9u3p09egds.cloudfront.net/filters:quality(75)/1200x900/filters:format(webp)/rental_partnerproperty/villa-samadhana/1._Samadhana_-_Sun_loungers_with_ocean_view.jpg`, target: "bali" },
+  { name: "Italy", image: `https://d3oo9u3p09egds.cloudfront.net/filters:quality(75)/1200x900/filters:format(webp)/rental_partnerproperty/villa-il-convento/1_Villa_exterior.webp`, target: "italy" },
+];
+
+// ====== Collections For You Mosaic ======
+const COLLECTIONS = [
+  { name: "Luma Villas", image: "/images/WhatsApp_Image_2026-07-13_at_7.18.00_PM.jpeg", size: "tall", target: "goa" },
+  { name: "Infinity Pool", image: "/images/WhatsApp_Image_2026--07-13_at_7.19.03_PM.jpeg", size: "wide", target: "goa" },
+  { name: "1 Bedroom Offerings", image: "/images/WhatsApp_Image_2026-07-13_at_7.18.25_PM.jpeg", size: "normal", target: "goa" },
+  { name: "Pet-friendly", image: "/images/WhatsApp_Image_2026-07-13_at_7.18.44_PM.jpeg", size: "normal", target: "goa" },
+  { name: "Wellness Retreats", image: "/images/WhatsApp_Image_2026-07-13_at_7.18.00_PM.jpeg", size: "normal", target: "goa" },
+  { name: "Off-beat Getaway", image: "/images/WhatsApp_Image_2026-07-13_at_7.19.03_PM.jpeg", size: "normal", target: "coonoor" },
+  { name: "Senior Citizen-Friendly", image: "/images/WhatsApp_Image_2026-07-13_at_7.18.25_PM.jpeg", size: "normal", target: "goa" },
+  { name: "Event-friendly", image: "/images/WhatsApp_Image_2026-07-13_at_7.18.44_PM.jpeg", size: "normal", target: "goa" },
+];
 
 export default function App() {
   const [activeTab, setActiveTab] = useState("home");
@@ -18,46 +101,62 @@ export default function App() {
   const [categoryFilter, setCategoryFilter] = useState("All");
   const [favorites, setFavorites] = useState([]);
   const [bookings, setBookings] = useState([]);
-  
-  // Drawer/Modal States
+  const [bannerIndex, setBannerIndex] = useState(0);
+  const [bannerTransition, setBannerTransition] = useState(false);
+  const bannerTimer = useRef(null);
+
   const [selectedProperty, setSelectedProperty] = useState(null);
   const [selectedVilla, setSelectedVilla] = useState(null);
   const [chatProperty, setChatProperty] = useState(null);
   const [showGeneralChat, setShowGeneralChat] = useState(false);
   const [mapHoveredPin, setMapHoveredPin] = useState(null);
 
-  // Load from localStorage
   useEffect(() => {
     const savedFavorites = localStorage.getItem("malina_favorites");
-    if (savedFavorites) {
-      setFavorites(JSON.parse(savedFavorites));
-    }
+    if (savedFavorites) setFavorites(JSON.parse(savedFavorites));
     const savedBookings = localStorage.getItem("malina_bookings");
-    if (savedBookings) {
-      setBookings(JSON.parse(savedBookings));
-    }
+    if (savedBookings) setBookings(JSON.parse(savedBookings));
   }, []);
 
-  // Save favorites to localStorage
+  useEffect(() => {
+    bannerTimer.current = setInterval(() => advanceBanner(1), 5500);
+    return () => clearInterval(bannerTimer.current);
+  }, [bannerIndex]);
+
+  const advanceBanner = (dir) => {
+    setBannerTransition(true);
+    setTimeout(() => {
+      setBannerIndex(prev => (prev + dir + GOA_BANNERS.length) % GOA_BANNERS.length);
+      setBannerTransition(false);
+    }, 400);
+    clearInterval(bannerTimer.current);
+  };
+
+  const goToBanner = (i) => {
+    clearInterval(bannerTimer.current);
+    setBannerTransition(true);
+    setTimeout(() => { setBannerIndex(i); setBannerTransition(false); }, 400);
+  };
+
+  const scrollToCollection = (id) => {
+    const el = document.getElementById(`collection-${id}`);
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
   const handleToggleFavorite = (id) => {
-    let updated;
-    if (favorites.includes(id)) {
-      updated = favorites.filter(favId => favId !== id);
-    } else {
-      updated = [...favorites, id];
-    }
+    const updated = favorites.includes(id)
+      ? favorites.filter(fid => fid !== id)
+      : [...favorites, id];
     setFavorites(updated);
     localStorage.setItem("malina_favorites", JSON.stringify(updated));
   };
 
-  // Add booking request
   const handleAddBooking = (newBooking) => {
     const updated = [newBooking, ...bookings];
     setBookings(updated);
     localStorage.setItem("malina_bookings", JSON.stringify(updated));
   };
 
-  // Cancel booking request
   const handleCancelBooking = (bookingId) => {
     if (window.confirm("Are you sure you want to cancel this booking inquiry?")) {
       const updated = bookings.filter(b => b.id !== bookingId);
@@ -66,19 +165,14 @@ export default function App() {
     }
   };
 
-  // Filter properties logic
   const getFilteredProperties = () => {
     return properties.filter(prop => {
-      const matchesSearch = 
+      const matchesSearch =
         prop.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         prop.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        prop.amenities.some(amenity => amenity.toLowerCase().includes(searchQuery.toLowerCase())) ||
-        prop.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
-      
-      const matchesCategory = 
-        categoryFilter === "All" || 
-        prop.type === categoryFilter;
-
+        prop.amenities.some(a => a.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        prop.tags.some(t => t.toLowerCase().includes(searchQuery.toLowerCase()));
+      const matchesCategory = categoryFilter === "All" || prop.type === categoryFilter;
       return matchesSearch && matchesCategory;
     });
   };
@@ -86,320 +180,370 @@ export default function App() {
   const filteredProps = getFilteredProperties();
   const indiaProps = filteredProps.filter(p => p.category === "India Collection");
   const internationalProps = filteredProps.filter(p => p.category === "International Luxury");
+  const currentBanner = GOA_BANNERS[bannerIndex];
 
-  // Full-page villa detail view takes over the entire screen
   if (selectedVilla) {
-    return (
-      <VillaDetailPage
-        villa={selectedVilla}
-        onBack={() => setSelectedVilla(null)}
-      />
-    );
+    return <VillaDetailPage villa={selectedVilla} onBack={() => setSelectedVilla(null)} />;
   }
+
+  const VillaCard = ({ villa, symbol, priceKey }) => (
+    <div className="property-card" onClick={() => setSelectedVilla(villa)} style={{ cursor: "pointer" }}>
+      <div className="card-image-container">
+        <img src={villa.images[0].src} alt={villa.name} className="card-image" loading="lazy" />
+        <div className="card-badge-container">
+          {villa.tags.map((tag, i) => (
+            <span key={i} className="card-badge badge-luxury">{tag}</span>
+          ))}
+        </div>
+      </div>
+      <div className="card-content">
+        <div className="card-meta">
+          <span className="card-location">
+            <MapPin size={14} style={{ color: "var(--clr-gold)" }} /> {villa.location}
+          </span>
+        </div>
+        <h3 className="card-title">{villa.name}</h3>
+        <div className="card-amenities">
+          <span>Upto {villa.guests} Guests</span>
+          <span className="amenity-dot">•</span>
+          <span>{villa.bedrooms} Bedrooms</span>
+          <span className="amenity-dot">•</span>
+          <span>{villa.bathrooms} Bathrooms</span>
+        </div>
+        <div className="card-footer">
+          <div className="card-price-container">
+            <span className="price-label">Starting From</span>
+            <span className="price-val">{symbol}{villa[priceKey]?.toLocaleString("en-IN")}</span>
+            <span className="price-sub">/night</span>
+          </div>
+          <button className="view-property-btn">View Details</button>
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <div className="app-container">
-      {/* Header Section */}
-      <Header 
-        searchQuery={searchQuery} 
-        setSearchQuery={setSearchQuery} 
-        activeTab={activeTab} 
+      <Header
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        activeTab={activeTab}
         setActiveTab={setActiveTab}
         favoritesCount={favorites.length}
       />
 
-      <main className="main-content">
-        {/* VIEW 1: HOME VIEW */}
+      <main className="main-content" style={{ padding: 0 }}>
         {activeTab === "home" && (
           <>
-            {/* Hero Banner */}
-            <section className="hero">
-              <h1>Featured Luxury<br />Villas & Resorts</h1>
-              <p>An exclusive collection of the world's most prestigious escapes, handpicked for extraordinary travel experiences.</p>
-            </section>
-
-            {/* Category Filter Pills */}
-            <div className="category-pills">
-              <button 
-                className={`pill-btn ${categoryFilter === "All" ? "active" : ""}`}
-                onClick={() => setCategoryFilter("All")}
-              >
-                All Escapes
-              </button>
-              <button 
-                className={`pill-btn ${categoryFilter === "Private Villas" ? "active" : ""}`}
-                onClick={() => setCategoryFilter("Private Villas")}
-              >
-                Private Villas
-              </button>
-              <button 
-                className={`pill-btn ${categoryFilter === "Wellness Retreats" ? "active" : ""}`}
-                onClick={() => setCategoryFilter("Wellness Retreats")}
-              >
-                Wellness Retreats
-              </button>
-            </div>
-
-            {/* Empty State for Filters */}
-            {filteredProps.length === 0 && (
-              <div className="empty-state" style={{ padding: "40px" }}>
-                <h3>No Properties Match Your Search</h3>
-                <p>Try searching for different destinations, properties, or filters.</p>
-                <button className="browse-now-btn" onClick={() => { setSearchQuery(""); setCategoryFilter("All"); }}>
-                  Reset Filters
+            {/* ===== HERO CAROUSEL ===== */}
+            <section
+              className="goa-hero"
+              style={{ backgroundImage: `url(${currentBanner.image})` }}
+            >
+              <div className={`goa-hero-overlay ${bannerTransition ? "fading" : ""}`} />
+              <div className={`goa-hero-content ${bannerTransition ? "fading" : ""}`}>
+                <span className="goa-hero-tag">{currentBanner.tag}</span>
+                <h1 className="goa-hero-headline">
+                  <span className="goa-hero-script">{currentBanner.script}</span>
+                  <span className="goa-hero-bold">{currentBanner.headline}</span>
+                </h1>
+                <p className="goa-hero-subline">{currentBanner.subline}</p>
+                <button className="goa-hero-cta" onClick={() => scrollToCollection("goa")}>
+                  Explore Goa Villas
                 </button>
               </div>
-            )}
 
-            {/* Italy Collection Section */}
-            <section className="section">
-              <div className="section-header">
-                <h2 className="section-title">Italy Collection</h2>
+              <button className="goa-hero-arrow goa-hero-arrow-left" onClick={() => advanceBanner(-1)} aria-label="Previous">
+                <ChevronLeft size={24} />
+              </button>
+              <button className="goa-hero-arrow goa-hero-arrow-right" onClick={() => advanceBanner(1)} aria-label="Next">
+                <ChevronRight size={24} />
+              </button>
+
+              <div className="goa-hero-dots">
+                {GOA_BANNERS.map((_, i) => (
+                  <button
+                    key={i}
+                    className={`goa-hero-dot ${i === bannerIndex ? "active" : ""}`}
+                    onClick={() => goToBanner(i)}
+                    aria-label={`Go to slide ${i + 1}`}
+                  />
+                ))}
               </div>
-              <div className="properties-grid">
-                {italyVillas.map(villa => (
-                  <div
-                    key={villa.id}
-                    className="property-card"
-                    onClick={() => setSelectedVilla(villa)}
-                    style={{ cursor: "pointer" }}
-                  >
-                    <div className="card-image-container">
-                      <img src={villa.images[0].src} alt={villa.name} className="card-image" loading="lazy" />
-                      <div className="card-badge-container">
-                        {villa.tags.map((tag, i) => (
-                          <span key={i} className="card-badge badge-luxury">{tag}</span>
-                        ))}
-                      </div>
-                    </div>
-                    <div className="card-content">
-                      <div className="card-meta">
-                        <span className="card-location">
-                          <MapPin size={14} style={{ color: "var(--clr-gold)" }} /> {villa.location}
-                        </span>
-                      </div>
-                      <h3 className="card-title">{villa.name}</h3>
-                      <div className="card-amenities">
-                        <span>Upto {villa.guests} Guests</span>
-                        <span className="amenity-dot">•</span>
-                        <span>{villa.bedrooms} Bedrooms</span>
-                        <span className="amenity-dot">•</span>
-                        <span>{villa.bathrooms} Bathrooms</span>
-                      </div>
-                      <div className="card-footer">
-                        <div className="card-price-container">
-                          <span className="price-label">Starting From</span>
-                          <span className="price-val">€{villa.priceEUR.toLocaleString("en-IE")}</span>
-                          <span className="price-sub">/night</span>
-                        </div>
-                        <button className="view-property-btn">View Details</button>
-                      </div>
-                    </div>
+            </section>
+
+            {/* ===== STATS BAR ===== */}
+            <div className="hp-stats-bar">
+              {STATS.map((s, i) => (
+                <div key={i} className="hp-stat-item">
+                  <s.icon size={28} strokeWidth={1.5} style={{ color: s.color }} />
+                  <div className="hp-stat-text">
+                    <span className="hp-stat-value">{s.value}</span>
+                    <span className="hp-stat-label">{s.label}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* ===== THE MALINA EXPERIENCE ===== */}
+            <section className="hp-experience-section">
+              <div className="hp-section-heading">
+                <span className="hp-heading-line" />
+                <span className="hp-heading-diamond" />
+                <h2>The Malina Experience</h2>
+                <span className="hp-heading-diamond" />
+                <span className="hp-heading-line" />
+              </div>
+              <p className="hp-experience-subtitle">Every stay is curated, every detail considered</p>
+              <div className="hp-experience-grid">
+                {EXPERIENCES.map(({ icon: Icon, label, desc }) => (
+                  <div key={label} className="hp-experience-col">
+                    <Icon size={32} strokeWidth={1.25} style={{ color: "var(--clr-gold-dark)" }} />
+                    <h3>{label}</h3>
+                    <p>{desc}</p>
                   </div>
                 ))}
               </div>
             </section>
 
-            {/* Bali Collection Section */}
-            <section className="section">
-              <div className="section-header">
-                <h2 className="section-title">Bali Collection</h2>
-              </div>
-              <div className="properties-grid">
-                {baliVillas.map(villa => (
-                  <div
-                    key={villa.id}
-                    className="property-card"
-                    onClick={() => setSelectedVilla(villa)}
-                    style={{ cursor: "pointer" }}
-                  >
-                    <div className="card-image-container">
-                      <img src={villa.images[0].src} alt={villa.name} className="card-image" loading="lazy" />
-                      <div className="card-badge-container">
-                        {villa.tags.map((tag, i) => (
-                          <span key={i} className="card-badge badge-luxury">{tag}</span>
-                        ))}
-                      </div>
+            {/* ===== EXPLORE MALINA ===== */}
+            <section className="hp-explore-section">
+              <div className="hp-explore-inner">
+                <h2 className="hp-explore-title">Explore Malina</h2>
+                <p className="hp-explore-subtitle">Discover our handpicked destinations</p>
+
+                <div className="hp-explore-separator">
+                  <span>Domestic Properties</span>
+                </div>
+                <div className="hp-explore-rows">
+                  {DOMESTIC_DESTINATIONS.map(dest => (
+                    <div key={dest.name} className="hp-explore-row" onClick={() => scrollToCollection(dest.target)}>
+                      <img src={dest.image} alt={dest.name} loading="lazy" />
+                      <span className="hp-explore-row-name">{dest.name}</span>
+                      <ChevronRight size={18} className="hp-explore-row-arrow" />
                     </div>
-                    <div className="card-content">
-                      <div className="card-meta">
-                        <span className="card-location">
-                          <MapPin size={14} style={{ color: "var(--clr-gold)" }} /> {villa.location}
-                        </span>
-                      </div>
-                      <h3 className="card-title">{villa.name}</h3>
-                      <div className="card-amenities">
-                        <span>Upto {villa.guests} Guests</span>
-                        <span className="amenity-dot">•</span>
-                        <span>{villa.bedrooms} Bedrooms</span>
-                        <span className="amenity-dot">•</span>
-                        <span>{villa.bathrooms} Bathrooms</span>
-                      </div>
-                      <div className="card-footer">
-                        <div className="card-price-container">
-                          <span className="price-label">Starting From</span>
-                          <span className="price-val">${villa.priceUSD.toLocaleString("en-US")}</span>
-                          <span className="price-sub">/night</span>
-                        </div>
-                        <button className="view-property-btn">View Details</button>
-                      </div>
+                  ))}
+                </div>
+
+                <div className="hp-explore-separator">
+                  <span>International Properties</span>
+                </div>
+                <div className="hp-explore-rows">
+                  {INTERNATIONAL_DESTINATIONS.map(dest => (
+                    <div key={dest.name} className="hp-explore-row" onClick={() => scrollToCollection(dest.target)}>
+                      <img src={dest.image} alt={dest.name} loading="lazy" />
+                      <span className="hp-explore-row-name">{dest.name}</span>
+                      <ChevronRight size={18} className="hp-explore-row-arrow" />
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             </section>
 
-            {/* Coonoor Collection Section */}
-            <section className="section">
-              <div className="section-header">
-                <h2 className="section-title">Coonoor Collection</h2>
+            {/* ===== MALINA LUMA FEATURED ===== */}
+            <section className="hp-luma-section">
+              <div className="hp-luma-inner">
+                <div className="hp-luma-left">
+                  <span className="hp-collection-eyebrow">Featured Collection</span>
+                  <h2>Malina Luma Villas</h2>
+                  <p>
+                    Our signature collection of Portuguese-colonial villas in Goa. Each Luma villa
+                    offers a private pool, lush tropical gardens, and authentic Goan charm blended
+                    with modern luxury. Handpicked for those who seek the extraordinary.
+                  </p>
+                  <button className="hp-luma-cta" onClick={() => scrollToCollection("goa")}>
+                    View Luma Villas
+                  </button>
+                </div>
+                <div className="hp-luma-right">
+                  <img src="/images/WhatsApp_Image_2026-07-13_at_7.18.00_PM.jpeg" alt="Luma Villa pool" loading="lazy" />
+                </div>
               </div>
-              <div className="properties-grid">
-                {coonoorVillas.map(villa => (
-                  <div
-                    key={villa.id}
-                    className="property-card"
-                    onClick={() => setSelectedVilla(villa)}
-                    style={{ cursor: "pointer" }}
-                  >
-                    <div className="card-image-container">
-                      <img src={villa.images[0].src} alt={villa.name} className="card-image" loading="lazy" />
-                      <div className="card-badge-container">
-                        {villa.tags.map((tag, i) => (
-                          <span key={i} className="card-badge badge-luxury">{tag}</span>
-                        ))}
-                      </div>
-                    </div>
-                    <div className="card-content">
-                      <div className="card-meta">
-                        <span className="card-location">
-                          <MapPin size={14} style={{ color: "var(--clr-gold)" }} /> {villa.location}
-                        </span>
-                      </div>
-                      <h3 className="card-title">{villa.name}</h3>
-                      <div className="card-amenities">
-                        <span>Upto {villa.guests} Guests</span>
-                        <span className="amenity-dot">•</span>
-                        <span>{villa.bedrooms} Bedrooms</span>
-                        <span className="amenity-dot">•</span>
-                        <span>{villa.bathrooms} Bathrooms</span>
-                      </div>
-                      <div className="card-footer">
-                        <div className="card-price-container">
-                          <span className="price-label">Starting From</span>
-                          <span className="price-val">₹{villa.priceINR.toLocaleString("en-IN")}</span>
-                          <span className="price-sub">/night</span>
-                        </div>
-                        <button className="view-property-btn">View Details</button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
+
+              <div className="hp-luma-offers">
+                <div className="hp-luma-offer">
+                  <Waves size={28} strokeWidth={1.5} style={{ color: "var(--clr-gold)" }} />
+                  <span>Private Pool</span>
+                </div>
+                <div className="hp-luma-offer">
+                  <UtensilsCrossed size={28} strokeWidth={1.5} style={{ color: "var(--clr-gold)" }} />
+                  <span>In-Villa Dining</span>
+                </div>
+                <div className="hp-luma-offer">
+                  <Shield size={28} strokeWidth={1.5} style={{ color: "var(--clr-gold)" }} />
+                  <span>Vetted & Verified</span>
+                </div>
+                <div className="hp-luma-offer">
+                  <Heart size={28} strokeWidth={1.5} style={{ color: "var(--clr-gold)" }} />
+                  <span>Personal Concierge</span>
+                </div>
               </div>
             </section>
 
-            {/* India Collection Section */}
-            {indiaProps.length > 0 && (
-              <section className="section">
+            {/* ===== COLLECTIONS FOR YOU (Mosaic) ===== */}
+            <section className="hp-collections-section">
+              <div className="hp-collections-inner">
+                <div className="hp-section-heading">
+                  <span className="hp-heading-line" />
+                  <span className="hp-heading-diamond" />
+                  <h2>Collections For You</h2>
+                  <span className="hp-heading-diamond" />
+                  <span className="hp-heading-line" />
+                </div>
+                <div className="hp-mosaic-grid">
+                  {COLLECTIONS.map((col, i) => (
+                    <div
+                      key={i}
+                      className={`hp-mosaic-tile hp-mosaic-${col.size}`}
+                      onClick={() => scrollToCollection(col.target)}
+                    >
+                      <img src={col.image} alt={col.name} loading="lazy" />
+                      <div className="hp-mosaic-overlay">
+                        <span>{col.name}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </section>
+
+            {/* ===== GOA COLLECTION ===== */}
+            <section id="collection-goa" className="hp-villa-section">
+              <div className="hp-villa-inner">
                 <div className="section-header">
-                  <h2 className="section-title">India Collection</h2>
-                  <button className="view-all-btn" onClick={() => setActiveTab("explore")}>View All</button>
+                  <h2 className="section-title">Goa Collection</h2>
                 </div>
                 <div className="properties-grid">
-                  {indiaProps.map(prop => (
-                    <PropertyCard 
-                      key={prop.id} 
-                      property={prop} 
-                      isFavorite={favorites.includes(prop.id)}
-                      onToggleFavorite={handleToggleFavorite}
-                      onViewDetails={setSelectedProperty}
-                      onOpenChat={setChatProperty}
-                    />
+                  {goaVillas.map(villa => (
+                    <VillaCard key={villa.id} villa={villa} symbol="₹" priceKey="priceINR" />
                   ))}
+                </div>
+              </div>
+            </section>
+
+            {/* ===== COONOOR COLLECTION ===== */}
+            <section id="collection-coonoor" className="hp-villa-section">
+              <div className="hp-villa-inner">
+                <div className="section-header">
+                  <h2 className="section-title">Coonoor Collection</h2>
+                </div>
+                <div className="properties-grid">
+                  {coonoorVillas.map(villa => (
+                    <VillaCard key={villa.id} villa={villa} symbol="₹" priceKey="priceINR" />
+                  ))}
+                </div>
+              </div>
+            </section>
+
+            {/* ===== BALI COLLECTION ===== */}
+            <section id="collection-bali" className="hp-villa-section">
+              <div className="hp-villa-inner">
+                <div className="section-header">
+                  <h2 className="section-title">Bali Collection</h2>
+                </div>
+                <div className="properties-grid">
+                  {baliVillas.map(villa => (
+                    <VillaCard key={villa.id} villa={villa} symbol="$" priceKey="priceUSD" />
+                  ))}
+                </div>
+              </div>
+            </section>
+
+            {/* ===== ITALY COLLECTION ===== */}
+            <section id="collection-italy" className="hp-villa-section">
+              <div className="hp-villa-inner">
+                <div className="section-header">
+                  <h2 className="section-title">Italy Collection</h2>
+                </div>
+                <div className="properties-grid">
+                  {italyVillas.map(villa => (
+                    <VillaCard key={villa.id} villa={villa} symbol="€" priceKey="priceEUR" />
+                  ))}
+                </div>
+              </div>
+            </section>
+
+            {/* ===== INDIA COLLECTION ===== */}
+            {indiaProps.length > 0 && (
+              <section className="hp-villa-section">
+                <div className="hp-villa-inner">
+                  <div className="section-header">
+                    <h2 className="section-title">India Collection</h2>
+                    <button className="view-all-btn" onClick={() => setActiveTab("explore")}>View All</button>
+                  </div>
+                  <div className="properties-grid">
+                    {indiaProps.map(prop => (
+                      <PropertyCard
+                        key={prop.id}
+                        property={prop}
+                        isFavorite={favorites.includes(prop.id)}
+                        onToggleFavorite={handleToggleFavorite}
+                        onViewDetails={setSelectedProperty}
+                        onOpenChat={setChatProperty}
+                      />
+                    ))}
+                  </div>
                 </div>
               </section>
             )}
 
-            {/* International Luxury Section */}
+            {/* ===== INTERNATIONAL LUXURY ===== */}
             {internationalProps.length > 0 && (
-              <section className="section">
-                <div className="section-header">
-                  <h2 className="section-title">International Luxury</h2>
-                  <button className="view-all-btn" onClick={() => setActiveTab("explore")}>Explore All</button>
-                </div>
-                <div className="properties-grid">
-                  {internationalProps.map(prop => (
-                    <PropertyCard 
-                      key={prop.id} 
-                      property={prop} 
-                      isFavorite={favorites.includes(prop.id)}
-                      onToggleFavorite={handleToggleFavorite}
-                      onViewDetails={setSelectedProperty}
-                      onOpenChat={setChatProperty}
-                    />
-                  ))}
+              <section className="hp-villa-section">
+                <div className="hp-villa-inner">
+                  <div className="section-header">
+                    <h2 className="section-title">International Luxury</h2>
+                    <button className="view-all-btn" onClick={() => setActiveTab("explore")}>Explore All</button>
+                  </div>
+                  <div className="properties-grid">
+                    {internationalProps.map(prop => (
+                      <PropertyCard
+                        key={prop.id}
+                        property={prop}
+                        isFavorite={favorites.includes(prop.id)}
+                        onToggleFavorite={handleToggleFavorite}
+                        onViewDetails={setSelectedProperty}
+                        onOpenChat={setChatProperty}
+                      />
+                    ))}
+                  </div>
                 </div>
               </section>
             )}
           </>
         )}
 
-        {/* VIEW 2: EXPLORE / MAP VIEW */}
+        {/* ===== EXPLORE / MAP VIEW ===== */}
         {activeTab === "explore" && (
-          <section className="section">
+          <section className="section" style={{ padding: "0 20px" }}>
             <div className="section-header" style={{ marginBottom: "8px" }}>
               <h2 className="section-title" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                <Compass size={28} className="text-gold" style={{ color: "var(--clr-gold)" }} />
+                <Compass size={28} style={{ color: "var(--clr-gold)" }} />
                 Explore The World of Malina
               </h2>
             </div>
             <p style={{ color: "var(--clr-grey-dark)", marginBottom: "32px" }}>
               Interact with our curated map pins to discover ultra-luxury hotel destinations around the globe.
             </p>
-
-            {/* SVG Interactive Map Overlay */}
             <div style={{
-              position: "relative",
-              width: "100%",
-              height: "380px",
-              backgroundColor: "var(--clr-navy)",
-              borderRadius: "var(--radius-lg)",
-              overflow: "hidden",
-              marginBottom: "32px",
-              boxShadow: "var(--shadow-md)"
+              position: "relative", width: "100%", height: "380px",
+              backgroundColor: "var(--clr-navy)", borderRadius: "var(--radius-lg)",
+              overflow: "hidden", marginBottom: "32px", boxShadow: "var(--shadow-md)"
             }}>
-              {/* Stylized background lines for world map feeling */}
-              <svg 
-                width="100%" 
-                height="100%" 
-                viewBox="0 0 1000 500" 
-                style={{ opacity: 0.25 }}
-              >
-                {/* World contour simulation (simple horizontal/vertical grid) */}
+              <svg width="100%" height="100%" viewBox="0 0 1000 500" style={{ opacity: 0.25 }}>
                 {[...Array(10)].map((_, i) => (
                   <line key={`x-${i}`} x1={i * 100} y1="0" x2={i * 100} y2="500" stroke="var(--clr-gold-light)" strokeWidth="0.5" strokeDasharray="5,5" />
                 ))}
                 {[...Array(6)].map((_, i) => (
                   <line key={`y-${i}`} x1="0" y1={i * 85 + 20} x2="1000" y2={i * 85 + 20} stroke="var(--clr-gold-light)" strokeWidth="0.5" strokeDasharray="5,5" />
                 ))}
-                
-                {/* Simplified SVG Map paths of continents */}
                 <path d="M150,120 Q200,90 280,100 Q320,130 300,180 Q250,220 200,200 Z" fill="#1b304c" />
                 <path d="M480,120 Q560,80 620,100 Q650,150 580,220 Q540,250 490,200 Z" fill="#1b304c" />
                 <path d="M600,200 Q640,160 700,210 Q740,280 680,320 Q640,320 600,260 Z" fill="#1b304c" />
                 <path d="M220,240 Q280,260 300,320 Q320,380 250,420 Q200,360 210,300 Z" fill="#1b304c" />
                 <path d="M500,280 Q560,280 580,340 Q550,420 510,400 Q480,350 480,300 Z" fill="#1b304c" />
               </svg>
-
-              {/* Pulsing Coordinates */}
               {properties.map((prop) => {
-                // Approximate relative map layout coordinates
-                // 1. Monaco: x: 490, y: 155
-                // 2. Venice: x: 505, y: 145
-                // 3. Santorini: x: 525, y: 175
-                // 4. Udaipur: x: 670, y: 220
-                // 5. Goa: x: 675, y: 240
-                // 6. Kovalam: x: 680, y: 260
                 let x = 500, y = 250;
                 if (prop.id === "hotel-de-paris") { x = 485; y = 145; }
                 else if (prop.id === "aman-venice") { x = 502; y = 135; }
@@ -407,69 +551,37 @@ export default function App() {
                 else if (prop.id === "taj-lake-palace") { x = 650; y = 210; }
                 else if (prop.id === "w-goa") { x = 658; y = 232; }
                 else if (prop.id === "the-leela-kovalam") { x = 665; y = 255; }
-
                 const isHovered = mapHoveredPin === prop.id;
-
                 return (
-                  <div 
+                  <div
                     key={prop.id}
                     style={{
-                      position: "absolute",
-                      left: `${(x / 1000) * 100}%`,
-                      top: `${(y / 500) * 100}%`,
-                      transform: "translate(-50%, -50%)",
-                      cursor: "pointer",
-                      zIndex: isHovered ? 10 : 5
+                      position: "absolute", left: `${(x / 1000) * 100}%`, top: `${(y / 500) * 100}%`,
+                      transform: "translate(-50%, -50%)", cursor: "pointer", zIndex: isHovered ? 10 : 5
                     }}
                     onMouseEnter={() => setMapHoveredPin(prop.id)}
                     onMouseLeave={() => setMapHoveredPin(null)}
                     onClick={() => setSelectedProperty(prop)}
                   >
-                    {/* Ring Pulse Effect */}
                     <div style={{
-                      position: "absolute",
-                      width: isHovered ? "28px" : "18px",
-                      height: isHovered ? "28px" : "18px",
-                      borderRadius: "50%",
-                      backgroundColor: "var(--clr-gold)",
-                      opacity: 0.4,
+                      position: "absolute", width: isHovered ? "28px" : "18px", height: isHovered ? "28px" : "18px",
+                      borderRadius: "50%", backgroundColor: "var(--clr-gold)", opacity: 0.4,
                       animation: "pulse-ring 1.8s cubic-bezier(0.215, 0.610, 0.355, 1) infinite",
-                      transform: "translate(-25%, -25%)",
-                      transition: "width 0.2s, height 0.2s"
-                    }}></div>
-                    
-                    {/* Center Core Dot */}
+                      transform: "translate(-25%, -25%)", transition: "width 0.2s, height 0.2s"
+                    }} />
                     <div style={{
-                      width: "12px",
-                      height: "12px",
-                      borderRadius: "50%",
+                      width: "12px", height: "12px", borderRadius: "50%",
                       backgroundColor: isHovered ? "var(--clr-white)" : "var(--clr-gold)",
-                      border: "2px solid var(--clr-navy)",
-                      boxShadow: "0 0 10px rgba(197, 168, 128, 0.8)",
+                      border: "2px solid var(--clr-navy)", boxShadow: "0 0 10px rgba(197,168,128,0.8)",
                       transition: "background-color 0.2s"
-                    }}></div>
-
-                    {/* Property Hover Label Card */}
+                    }} />
                     {isHovered && (
                       <div style={{
-                        position: "absolute",
-                        bottom: "22px",
-                        left: "50%",
-                        transform: "translateX(-50%)",
-                        backgroundColor: "var(--clr-white)",
-                        color: "var(--clr-navy)",
-                        padding: "8px 12px",
-                        borderRadius: "8px",
-                        boxShadow: "var(--shadow-md)",
-                        fontSize: "0.85rem",
-                        fontWeight: "600",
-                        whiteSpace: "nowrap",
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "center",
-                        gap: "2px",
-                        pointerEvents: "none",
-                        animation: "fadeIn 0.2s ease"
+                        position: "absolute", bottom: "22px", left: "50%", transform: "translateX(-50%)",
+                        backgroundColor: "var(--clr-white)", color: "var(--clr-navy)", padding: "8px 12px",
+                        borderRadius: "8px", boxShadow: "var(--shadow-md)", fontSize: "0.85rem",
+                        fontWeight: "600", whiteSpace: "nowrap", display: "flex", flexDirection: "column",
+                        alignItems: "center", gap: "2px", pointerEvents: "none", animation: "fadeIn 0.2s ease"
                       }}>
                         <span style={{ fontSize: "0.9rem", color: "var(--clr-navy)" }}>{prop.name}</span>
                         <span style={{ fontSize: "0.75rem", color: "var(--clr-gold-dark)", display: "flex", alignItems: "center", gap: "2px" }}>
@@ -480,34 +592,23 @@ export default function App() {
                   </div>
                 );
               })}
-
               <div style={{
-                position: "absolute",
-                bottom: "16px",
-                left: "20px",
-                color: "var(--clr-white)",
-                fontSize: "0.85rem",
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                backgroundColor: "rgba(11, 26, 48, 0.6)",
-                padding: "8px 16px",
-                borderRadius: "var(--radius-sm)"
+                position: "absolute", bottom: "16px", left: "20px", color: "var(--clr-white)",
+                fontSize: "0.85rem", display: "flex", alignItems: "center", gap: "8px",
+                backgroundColor: "rgba(11,26,48,0.6)", padding: "8px 16px", borderRadius: "var(--radius-sm)"
               }}>
-                <span style={{ width: "8px", height: "8px", borderRadius: "50%", backgroundColor: "var(--clr-gold)", display: "inline-block" }}></span>
+                <span style={{ width: "8px", height: "8px", borderRadius: "50%", backgroundColor: "var(--clr-gold)", display: "inline-block" }} />
                 <span>Select a location pin to explore bookings</span>
               </div>
             </div>
-
-            {/* List of all Properties */}
             <div className="section-header">
               <h2 className="section-title">All Destinations ({properties.length})</h2>
             </div>
             <div className="properties-grid">
               {properties.map(prop => (
-                <PropertyCard 
-                  key={prop.id} 
-                  property={prop} 
+                <PropertyCard
+                  key={prop.id}
+                  property={prop}
                   isFavorite={favorites.includes(prop.id)}
                   onToggleFavorite={handleToggleFavorite}
                   onViewDetails={setSelectedProperty}
@@ -518,71 +619,55 @@ export default function App() {
           </section>
         )}
 
-        {/* VIEW 3: FAVORITES VIEW */}
+        {/* ===== FAVORITES ===== */}
         {activeTab === "favorites" && (
-          <section className="section">
+          <section className="section" style={{ padding: "0 20px" }}>
             <div className="section-header">
               <h2 className="section-title">My Saved Escapes</h2>
             </div>
-
             {favorites.length === 0 ? (
               <div className="empty-state">
-                <MapPin size={48} className="text-gold" style={{ strokeWidth: 1.5, color: "var(--clr-gold)" }} />
+                <MapPin size={48} style={{ strokeWidth: 1.5, color: "var(--clr-gold)" }} />
                 <h3>Your Favorites List is Empty</h3>
                 <p>Browse our handpicked villas and tap the heart icon to save them to your personal shortlist.</p>
-                <button className="browse-now-btn" onClick={() => setActiveTab("home")}>
-                  Start Discovering
-                </button>
+                <button className="browse-now-btn" onClick={() => setActiveTab("home")}>Start Discovering</button>
               </div>
             ) : (
               <div className="properties-grid">
-                {properties
-                  .filter(prop => favorites.includes(prop.id))
-                  .map(prop => (
-                    <PropertyCard 
-                      key={prop.id} 
-                      property={prop} 
-                      isFavorite={true}
-                      onToggleFavorite={handleToggleFavorite}
-                      onViewDetails={setSelectedProperty}
-                      onOpenChat={setChatProperty}
-                    />
-                  ))
-                }
+                {properties.filter(prop => favorites.includes(prop.id)).map(prop => (
+                  <PropertyCard
+                    key={prop.id}
+                    property={prop}
+                    isFavorite={true}
+                    onToggleFavorite={handleToggleFavorite}
+                    onViewDetails={setSelectedProperty}
+                    onOpenChat={setChatProperty}
+                  />
+                ))}
               </div>
             )}
           </section>
         )}
 
-        {/* VIEW 4: MY BOOKINGS VIEW */}
+        {/* ===== BOOKINGS ===== */}
         {activeTab === "bookings" && (
-          <BookingsList 
-            bookings={bookings} 
-            onCancelBooking={handleCancelBooking} 
+          <BookingsList
+            bookings={bookings}
+            onCancelBooking={handleCancelBooking}
             onBrowseClick={() => setActiveTab("home")}
           />
         )}
       </main>
 
-      {/* Floating Concierge Chat Button */}
-      <button 
+      <button
         className="chat-float-btn"
         onClick={() => setShowGeneralChat(true)}
         style={{
-          position: "fixed",
-          bottom: "90px",
-          right: "24px",
-          width: "56px",
-          height: "56px",
-          borderRadius: "50%",
-          backgroundColor: "var(--clr-navy)",
-          color: "var(--clr-white)",
-          boxShadow: "var(--shadow-lg)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          zIndex: 45,
-          cursor: "pointer",
+          position: "fixed", bottom: "90px", right: "24px",
+          width: "56px", height: "56px", borderRadius: "50%",
+          backgroundColor: "var(--clr-navy)", color: "var(--clr-white)",
+          boxShadow: "var(--shadow-lg)", display: "flex", alignItems: "center",
+          justifyContent: "center", zIndex: 45, cursor: "pointer",
           transition: "transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)"
         }}
         onMouseEnter={(e) => e.currentTarget.style.transform = "scale(1.1) translateY(-2px)"}
@@ -592,44 +677,25 @@ export default function App() {
         <MessageSquare size={24} />
       </button>
 
-      {/* Mobile Bottom Navigation Bar */}
       <BottomNavbar activeTab={activeTab} setActiveTab={setActiveTab} />
 
-      {/* Drawer Modals */}
       {selectedProperty && (
-        <PropertyDetail 
-          property={selectedProperty} 
-          onClose={() => setSelectedProperty(null)}
-          onAddBooking={handleAddBooking}
-        />
+        <PropertyDetail property={selectedProperty} onClose={() => setSelectedProperty(null)} onAddBooking={handleAddBooking} />
       )}
-
       {chatProperty && (
-        <ChatAssistant 
-          property={chatProperty} 
-          onClose={() => setChatProperty(null)}
-          onAddBooking={handleAddBooking}
-        />
+        <ChatAssistant property={chatProperty} onClose={() => setChatProperty(null)} onAddBooking={handleAddBooking} />
       )}
-
       {showGeneralChat && (
-        <ChatAssistant 
-          property={null} 
-          onClose={() => setShowGeneralChat(false)}
-          onAddBooking={handleAddBooking}
-        />
+        <ChatAssistant property={null} onClose={() => setShowGeneralChat(false)} onAddBooking={handleAddBooking} />
       )}
 
-      {/* CSS Animation Keyframes for map pulse and float */}
       <style>{`
         @keyframes pulse-ring {
-          0% { transform: translate(-25%, -25%) scale(0.35); opacity: 0.8; }
-          80%, 100% { transform: translate(-25%, -25%) scale(1.2); opacity: 0; }
+          0% { transform: translate(-25%,-25%) scale(0.35); opacity: 0.8; }
+          80%, 100% { transform: translate(-25%,-25%) scale(1.2); opacity: 0; }
         }
         @media (min-width: 768px) {
-          .chat-float-btn {
-            bottom: 24px !important;
-          }
+          .chat-float-btn { bottom: 24px !important; }
         }
       `}</style>
     </div>
