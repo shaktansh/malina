@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import Header from "./components/Header";
 import BottomNavbar from "./components/BottomNavbar";
 import PropertyCard from "./components/PropertyCard";
@@ -7,14 +8,11 @@ import ChatAssistant from "./components/ChatAssistant";
 import BookingsList from "./components/BookingsList";
 import VillaDetailPage from "./components/VillaDetailPage";
 import { properties } from "./data/properties";
-import { baliVillas } from "./data/baliVillas";
-import { italyVillas } from "./data/italyVillas";
-import { coonoorVillas } from "./data/coonoorVillas";
 import { goaVillas } from "./data/goaVillas";
 import {
   MessageSquare, MapPin, Compass, Star,
   ChevronLeft, ChevronRight, Sparkles,
-  Shield, Heart, Waves, UtensilsCrossed, PawPrint
+  Shield, Heart, Waves, UtensilsCrossed, PawPrint, TrendingUp, ArrowRight
 } from "lucide-react";
 
 // ====== Goa Hero Banners (rotating) ======
@@ -63,37 +61,42 @@ const STATS = [
   { icon: Shield, value: "97%", label: "Satisfaction", color: "#3b9e6e" },
 ];
 
-// ====== Experience Section ======
-const EXPERIENCES = [
-  { icon: Shield, label: "Vetted & Verified", desc: "Every villa personally inspected" },
-  { icon: Heart, label: "Personal Concierge", desc: "Dedicated support throughout your stay" },
-  { icon: Waves, label: "Private Pools", desc: "Exclusive pool in every villa" },
-  { icon: UtensilsCrossed, label: "In-Villa Dining", desc: "Chef on request, local cuisine" },
-  { icon: PawPrint, label: "Pet Friendly", desc: "Selected villas welcome your pets" },
+// ====== Explore Destinations ======
+const DESTINATIONS = [
+  {
+    name: "North Goa",
+    image: "https://d3oo9u3p09egds.cloudfront.net/filters:format(webp)/rental_property/monforte-vaddo-d/1.webp",
+    desc: "Vibrant beaches, nightlife & luxury villas",
+    target: "goa",
+  },
+  {
+    name: "South Goa",
+    image: "https://d3oo9u3p09egds.cloudfront.net/filters:format(webp)/rental_property/villa-brisa/Brisa_SS_isprava-9.webp",
+    desc: "Serene shores, palm fringes & peaceful stays",
+    target: "goa",
+  },
+  {
+    name: "Coonoor",
+    image: "https://d3oo9u3p09egds.cloudfront.net/filters:format(webp)/rental_property/amani-villas-12a/DJI_0094-Edit.webp",
+    desc: "Misty hills, tea gardens & colonial charm",
+    target: "coonoor",
+  },
 ];
 
-// ====== Explore Malina Rows ======
-const DOMESTIC_DESTINATIONS = [
-  { name: "Goa", image: "/images/WhatsApp_Image_2026-07-13_at_7.19.03_PM.jpeg", target: "goa" },
-  { name: "Coonoor", image: `https://d3oo9u3p09egds.cloudfront.net/filters:quality(75)/1200x900/filters:format(webp)/rental_property/amani-villas-12a/DJI_0094-Edit.webp`, target: "coonoor" },
-];
-
-const INTERNATIONAL_DESTINATIONS = [
-  { name: "Bali", image: `https://d3oo9u3p09egds.cloudfront.net/filters:quality(75)/1200x900/filters:format(webp)/rental_partnerproperty/villa-samadhana/1._Samadhana_-_Sun_loungers_with_ocean_view.jpg`, target: "bali" },
-  { name: "Italy", image: `https://d3oo9u3p09egds.cloudfront.net/filters:quality(75)/1200x900/filters:format(webp)/rental_partnerproperty/villa-il-convento/1_Villa_exterior.webp`, target: "italy" },
-];
-
-// ====== Collections For You Mosaic ======
+// ====== Collections For You ======
 const COLLECTIONS = [
-  { name: "Luma Villas", image: "/images/WhatsApp_Image_2026-07-13_at_7.18.00_PM.jpeg", size: "tall", target: "goa" },
-  { name: "Infinity Pool", image: "/images/WhatsApp_Image_2026--07-13_at_7.19.03_PM.jpeg", size: "wide", target: "goa" },
-  { name: "1 Bedroom Offerings", image: "/images/WhatsApp_Image_2026-07-13_at_7.18.25_PM.jpeg", size: "normal", target: "goa" },
-  { name: "Pet-friendly", image: "/images/WhatsApp_Image_2026-07-13_at_7.18.44_PM.jpeg", size: "normal", target: "goa" },
-  { name: "Wellness Retreats", image: "/images/WhatsApp_Image_2026-07-13_at_7.18.00_PM.jpeg", size: "normal", target: "goa" },
-  { name: "Off-beat Getaway", image: "/images/WhatsApp_Image_2026-07-13_at_7.19.03_PM.jpeg", size: "normal", target: "coonoor" },
-  { name: "Senior Citizen-Friendly", image: "/images/WhatsApp_Image_2026-07-13_at_7.18.25_PM.jpeg", size: "normal", target: "goa" },
-  { name: "Event-friendly", image: "/images/WhatsApp_Image_2026-07-13_at_7.18.44_PM.jpeg", size: "normal", target: "goa" },
+  { name: "Luma Villas", image: "/images/WhatsApp_Image_2026-07-13_at_7.18.00_PM.jpeg", target: "goa" },
+  { name: "Infinity Pool", image: "/images/WhatsApp_Image_2026--07-13_at_7.19.03_PM.jpeg", target: "goa" },
+  { name: "1 Bedroom", image: "/images/WhatsApp_Image_2026-07-13_at_7.18.25_PM.jpeg", target: "goa" },
+  { name: "Pet-friendly", image: "/images/WhatsApp_Image_2026-07-13_at_7.18.44_PM.jpeg", target: "goa" },
+  { name: "Wellness", image: "/images/WhatsApp_Image_2026-07-13_at_7.18.00_PM.jpeg", target: "goa" },
+  { name: "Off-beat", image: "/images/WhatsApp_Image_2026-07-13_at_7.19.03_PM.jpeg", target: "coonoor" },
+  { name: "Senior Friendly", image: "/images/WhatsApp_Image_2026-07-13_at_7.18.25_PM.jpeg", target: "goa" },
+  { name: "Event-friendly", image: "/images/WhatsApp_Image_2026-07-13_at_7.18.44_PM.jpeg", target: "goa" },
 ];
+
+// ====== Trending Villas (first 8) ======
+const TRENDING_VILLAS = goaVillas.slice(0, 8);
 
 export default function App() {
   const [activeTab, setActiveTab] = useState("home");
@@ -104,12 +107,34 @@ export default function App() {
   const [bannerIndex, setBannerIndex] = useState(0);
   const [bannerTransition, setBannerTransition] = useState(false);
   const bannerTimer = useRef(null);
+  const trendingScrollRef = useRef(null);
+  const navigate = useNavigate();
+  const touchStartX = useRef(0);
+  const touchEndX = useRef(0);
 
   const [selectedProperty, setSelectedProperty] = useState(null);
   const [selectedVilla, setSelectedVilla] = useState(null);
   const [chatProperty, setChatProperty] = useState(null);
   const [showGeneralChat, setShowGeneralChat] = useState(false);
   const [mapHoveredPin, setMapHoveredPin] = useState(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(true);
+
+  const handleTouchStart = (e) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchMove = (e) => {
+    touchEndX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchEnd = () => {
+    const diff = touchStartX.current - touchEndX.current;
+    if (Math.abs(diff) > 50) {
+      if (diff > 0) advanceBanner(1);
+      else advanceBanner(-1);
+    }
+  };
 
   useEffect(() => {
     const savedFavorites = localStorage.getItem("malina_favorites");
@@ -139,8 +164,24 @@ export default function App() {
   };
 
   const scrollToCollection = (id) => {
+    if (id === "goa") {
+      navigate("/goa");
+      return;
+    }
     const el = document.getElementById(`collection-${id}`);
     if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  const scrollTrending = (dir) => {
+    if (trendingScrollRef.current) {
+      const scrollAmount = 320;
+      trendingScrollRef.current.scrollBy({ left: dir * scrollAmount, behavior: "smooth" });
+      setTimeout(() => {
+        const el = trendingScrollRef.current;
+        setCanScrollLeft(el.scrollLeft > 10);
+        setCanScrollRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 10);
+      }, 350);
+    }
   };
 
   const handleToggleFavorite = (id) => {
@@ -186,37 +227,58 @@ export default function App() {
     return <VillaDetailPage villa={selectedVilla} onBack={() => setSelectedVilla(null)} />;
   }
 
-  const VillaCard = ({ villa, symbol, priceKey }) => (
-    <div className="property-card" onClick={() => setSelectedVilla(villa)} style={{ cursor: "pointer" }}>
-      <div className="card-image-container">
-        <img src={villa.images[0].src} alt={villa.name} className="card-image" loading="lazy" />
-        <div className="card-badge-container">
-          {villa.tags.map((tag, i) => (
-            <span key={i} className="card-badge badge-luxury">{tag}</span>
-          ))}
+  const TrendingCard = ({ villa }) => (
+    <div
+      className="trending-slide"
+      onClick={() => setSelectedVilla(villa)}
+      style={{ cursor: "pointer", minWidth: "280px", width: "280px" }}
+    >
+      <div className="trending-slide-image" style={{
+        position: "relative", borderRadius: "12px", overflow: "hidden",
+        height: "220px", flexShrink: 0
+      }}>
+        <img
+          src={villa.images[0].src}
+          alt={villa.name}
+          style={{ width: "100%", height: "100%", objectFit: "cover" }}
+          loading="lazy"
+        />
+        <div className="trending-slide-badge" style={{
+          position: "absolute", top: "12px", left: "12px",
+          backgroundColor: "rgba(197,168,128,0.9)", padding: "4px 10px",
+          borderRadius: "6px", fontSize: "0.7rem", fontWeight: 700, color: "#fff",
+          letterSpacing: "0.5px"
+        }}>
+          {villa.tags[0] || "LUXURY"}
         </div>
-      </div>
-      <div className="card-content">
-        <div className="card-meta">
-          <span className="card-location">
-            <MapPin size={14} style={{ color: "var(--clr-gold)" }} /> {villa.location}
-          </span>
-        </div>
-        <h3 className="card-title">{villa.name}</h3>
-        <div className="card-amenities">
-          <span>Upto {villa.guests} Guests</span>
-          <span className="amenity-dot">•</span>
-          <span>{villa.bedrooms} Bedrooms</span>
-          <span className="amenity-dot">•</span>
-          <span>{villa.bathrooms} Bathrooms</span>
-        </div>
-        <div className="card-footer">
-          <div className="card-price-container">
-            <span className="price-label">Starting From</span>
-            <span className="price-val">{symbol}{villa[priceKey]?.toLocaleString("en-IN")}</span>
-            <span className="price-sub">/night</span>
+        {villa.rating > 0 && (
+          <div className="trending-slide-rating" style={{
+            position: "absolute", top: "12px", right: "12px",
+            backgroundColor: "rgba(0,0,0,0.6)", padding: "4px 8px",
+            borderRadius: "6px", fontSize: "0.75rem", color: "#fff",
+            display: "flex", alignItems: "center", gap: "4px"
+          }}>
+            <Star size={10} fill="#c5a880" stroke="none" />
+            <span>{villa.rating}</span>
           </div>
-          <button className="view-property-btn">View Details</button>
+        )}
+      </div>
+      <div className="trending-slide-info" style={{ padding: "10px 2px" }}>
+        <div style={{ fontSize: "0.75rem", color: "var(--clr-gold)", fontWeight: 600 }}>
+          <MapPin size={10} style={{ display: "inline", marginRight: "2px" }} />
+          {villa.location}
+        </div>
+        <h4 style={{ fontSize: "0.95rem", margin: "4px 0 2px", fontWeight: 700, color: "var(--clr-navy)" }}>
+          {villa.name}
+        </h4>
+        <span style={{ fontSize: "0.8rem", color: "var(--clr-grey-dark)" }}>
+          {villa.bedrooms} BR &bull; Upto {villa.guests} Guests
+        </span>
+        <div style={{ marginTop: "6px", display: "flex", alignItems: "center", gap: "4px" }}>
+          <span style={{ fontSize: "1.1rem", fontWeight: 800, color: "var(--clr-navy)" }}>
+            ₹{villa.priceINR?.toLocaleString("en-IN")}
+          </span>
+          <span style={{ fontSize: "0.75rem", color: "var(--clr-grey)" }}>/night</span>
         </div>
       </div>
     </div>
@@ -239,6 +301,9 @@ export default function App() {
             <section
               className="goa-hero"
               style={{ backgroundImage: `url(${currentBanner.image})` }}
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
             >
               <div className={`goa-hero-overlay ${bannerTransition ? "fading" : ""}`} />
               <div className={`goa-hero-content ${bannerTransition ? "fading" : ""}`}>
@@ -252,14 +317,12 @@ export default function App() {
                   Explore Goa Villas
                 </button>
               </div>
-
               <button className="goa-hero-arrow goa-hero-arrow-left" onClick={() => advanceBanner(-1)} aria-label="Previous">
                 <ChevronLeft size={24} />
               </button>
               <button className="goa-hero-arrow goa-hero-arrow-right" onClick={() => advanceBanner(1)} aria-label="Next">
                 <ChevronRight size={24} />
               </button>
-
               <div className="goa-hero-dots">
                 {GOA_BANNERS.map((_, i) => (
                   <button
@@ -285,102 +348,36 @@ export default function App() {
               ))}
             </div>
 
-            {/* ===== THE MALINA EXPERIENCE ===== */}
-            <section className="hp-experience-section">
-              <div className="hp-section-heading">
-                <span className="hp-heading-line" />
-                <span className="hp-heading-diamond" />
-                <h2>The Malina Experience</h2>
-                <span className="hp-heading-diamond" />
-                <span className="hp-heading-line" />
-              </div>
-              <p className="hp-experience-subtitle">Every stay is curated, every detail considered</p>
-              <div className="hp-experience-grid">
-                {EXPERIENCES.map(({ icon: Icon, label, desc }) => (
-                  <div key={label} className="hp-experience-col">
-                    <Icon size={32} strokeWidth={1.25} style={{ color: "var(--clr-gold-dark)" }} />
-                    <h3>{label}</h3>
-                    <p>{desc}</p>
-                  </div>
-                ))}
-              </div>
-            </section>
-
-            {/* ===== EXPLORE MALINA ===== */}
+            {/* ===== EXPLORE DESTINATIONS ===== */}
             <section className="hp-explore-section">
               <div className="hp-explore-inner">
                 <h2 className="hp-explore-title">Explore Malina</h2>
-                <p className="hp-explore-subtitle">Discover our handpicked destinations</p>
-
-                <div className="hp-explore-separator">
-                  <span>Domestic Properties</span>
-                </div>
-                <div className="hp-explore-rows">
-                  {DOMESTIC_DESTINATIONS.map(dest => (
-                    <div key={dest.name} className="hp-explore-row" onClick={() => scrollToCollection(dest.target)}>
-                      <img src={dest.image} alt={dest.name} loading="lazy" />
-                      <span className="hp-explore-row-name">{dest.name}</span>
-                      <ChevronRight size={18} className="hp-explore-row-arrow" />
-                    </div>
-                  ))}
-                </div>
-
-                <div className="hp-explore-separator">
-                  <span>International Properties</span>
-                </div>
-                <div className="hp-explore-rows">
-                  {INTERNATIONAL_DESTINATIONS.map(dest => (
-                    <div key={dest.name} className="hp-explore-row" onClick={() => scrollToCollection(dest.target)}>
-                      <img src={dest.image} alt={dest.name} loading="lazy" />
-                      <span className="hp-explore-row-name">{dest.name}</span>
-                      <ChevronRight size={18} className="hp-explore-row-arrow" />
+                <p className="hp-explore-subtitle">Curated escapes across India's finest destinations</p>
+                <div className="hp-destination-grid">
+                  {DESTINATIONS.map(dest => (
+                    <div
+                      key={dest.name}
+                      className="hp-destination-card"
+                      onClick={() => scrollToCollection(dest.target)}
+                    >
+                      <div className="hp-destination-image">
+                        <img src={dest.image} alt={dest.name} loading="lazy" />
+                        <div className="hp-destination-overlay" />
+                      </div>
+                      <div className="hp-destination-content">
+                        <h3>{dest.name}</h3>
+                        <p>{dest.desc}</p>
+                        <span className="hp-destination-link">
+                          Explore <ArrowRight size={14} />
+                        </span>
+                      </div>
                     </div>
                   ))}
                 </div>
               </div>
             </section>
 
-            {/* ===== MALINA LUMA FEATURED ===== */}
-            <section className="hp-luma-section">
-              <div className="hp-luma-inner">
-                <div className="hp-luma-left">
-                  <span className="hp-collection-eyebrow">Featured Collection</span>
-                  <h2>Malina Luma Villas</h2>
-                  <p>
-                    Our signature collection of Portuguese-colonial villas in Goa. Each Luma villa
-                    offers a private pool, lush tropical gardens, and authentic Goan charm blended
-                    with modern luxury. Handpicked for those who seek the extraordinary.
-                  </p>
-                  <button className="hp-luma-cta" onClick={() => scrollToCollection("goa")}>
-                    View Luma Villas
-                  </button>
-                </div>
-                <div className="hp-luma-right">
-                  <img src="/images/WhatsApp_Image_2026-07-13_at_7.18.00_PM.jpeg" alt="Luma Villa pool" loading="lazy" />
-                </div>
-              </div>
-
-              <div className="hp-luma-offers">
-                <div className="hp-luma-offer">
-                  <Waves size={28} strokeWidth={1.5} style={{ color: "var(--clr-gold)" }} />
-                  <span>Private Pool</span>
-                </div>
-                <div className="hp-luma-offer">
-                  <UtensilsCrossed size={28} strokeWidth={1.5} style={{ color: "var(--clr-gold)" }} />
-                  <span>In-Villa Dining</span>
-                </div>
-                <div className="hp-luma-offer">
-                  <Shield size={28} strokeWidth={1.5} style={{ color: "var(--clr-gold)" }} />
-                  <span>Vetted & Verified</span>
-                </div>
-                <div className="hp-luma-offer">
-                  <Heart size={28} strokeWidth={1.5} style={{ color: "var(--clr-gold)" }} />
-                  <span>Personal Concierge</span>
-                </div>
-              </div>
-            </section>
-
-            {/* ===== COLLECTIONS FOR YOU (Mosaic) ===== */}
+            {/* ===== COLLECTIONS FOR YOU (Gallery grid) ===== */}
             <section className="hp-collections-section">
               <div className="hp-collections-inner">
                 <div className="hp-section-heading">
@@ -390,15 +387,15 @@ export default function App() {
                   <span className="hp-heading-diamond" />
                   <span className="hp-heading-line" />
                 </div>
-                <div className="hp-mosaic-grid">
+                <div className="hp-collections-gallery">
                   {COLLECTIONS.map((col, i) => (
                     <div
                       key={i}
-                      className={`hp-mosaic-tile hp-mosaic-${col.size}`}
+                      className="hp-collection-tile"
                       onClick={() => scrollToCollection(col.target)}
                     >
                       <img src={col.image} alt={col.name} loading="lazy" />
-                      <div className="hp-mosaic-overlay">
+                      <div className="hp-collection-tile-overlay">
                         <span>{col.name}</span>
                       </div>
                     </div>
@@ -407,109 +404,82 @@ export default function App() {
               </div>
             </section>
 
-            {/* ===== GOA COLLECTION ===== */}
-            <section id="collection-goa" className="hp-villa-section">
-              <div className="hp-villa-inner">
-                <div className="section-header">
-                  <h2 className="section-title">Goa Collection</h2>
+            {/* ===== TRENDING THIS SEASON ===== */}
+            <section className="hp-trending-section">
+              <div className="hp-trending-header">
+                <div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <TrendingUp size={22} style={{ color: "var(--clr-gold)" }} />
+                    <h2 className="section-title" style={{ margin: 0 }}>Trending This Season</h2>
+                  </div>
+                  <p style={{ color: "var(--clr-grey-dark)", fontSize: "0.85rem", marginTop: "4px" }}>
+                    Most booked luxury villas in Goa right now
+                  </p>
                 </div>
-                <div className="properties-grid">
-                  {goaVillas.map(villa => (
-                    <VillaCard key={villa.id} villa={villa} symbol="₹" priceKey="priceINR" />
+                <button className="view-all-btn" onClick={() => navigate("/goa")}>
+                  View All <ArrowRight size={14} />
+                </button>
+              </div>
+              <div className="trending-carousel-wrapper">
+                {canScrollLeft && (
+                  <button className="trending-scroll-btn trending-scroll-left" onClick={() => scrollTrending(-1)}>
+                    <ChevronLeft size={20} />
+                  </button>
+                )}
+                <div className="trending-carousel" ref={trendingScrollRef}
+                  onScroll={() => {
+                    const el = trendingScrollRef.current;
+                    if (el) {
+                      setCanScrollLeft(el.scrollLeft > 10);
+                      setCanScrollRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 10);
+                    }
+                  }}
+                >
+                  {TRENDING_VILLAS.map(villa => (
+                    <TrendingCard key={villa.id} villa={villa} />
                   ))}
                 </div>
+                {canScrollRight && (
+                  <button className="trending-scroll-btn trending-scroll-right" onClick={() => scrollTrending(1)}>
+                    <ChevronRight size={20} />
+                  </button>
+                )}
               </div>
             </section>
 
-            {/* ===== COONOOR COLLECTION ===== */}
-            <section id="collection-coonoor" className="hp-villa-section">
-              <div className="hp-villa-inner">
-                <div className="section-header">
-                  <h2 className="section-title">Coonoor Collection</h2>
+            {/* ===== QUICK LINKS / FOOTER ===== */}
+            <section className="hp-quicklinks-section">
+              <div className="hp-quicklinks-inner">
+                <div className="hp-quicklinks-col">
+                  <h4>Destinations</h4>
+                  <a onClick={() => navigate("/goa")}>North Goa</a>
+                  <a onClick={() => navigate("/goa")}>South Goa</a>
+                  <a onClick={() => scrollToCollection("coonoor")}>Coonoor</a>
                 </div>
-                <div className="properties-grid">
-                  {coonoorVillas.map(villa => (
-                    <VillaCard key={villa.id} villa={villa} symbol="₹" priceKey="priceINR" />
-                  ))}
+                <div className="hp-quicklinks-col">
+                  <h4>Collections</h4>
+                  <a onClick={() => navigate("/goa")}>Luma Villas</a>
+                  <a onClick={() => navigate("/goa")}>Wellness Retreats</a>
+                  <a onClick={() => navigate("/goa")}>Pet-Friendly</a>
+                  <a onClick={() => navigate("/goa")}>Event-Friendly</a>
                 </div>
-              </div>
-            </section>
-
-            {/* ===== BALI COLLECTION ===== */}
-            <section id="collection-bali" className="hp-villa-section">
-              <div className="hp-villa-inner">
-                <div className="section-header">
-                  <h2 className="section-title">Bali Collection</h2>
+                <div className="hp-quicklinks-col">
+                  <h4>Support</h4>
+                  <a href="tel:+918430600600">+91 84306 00600</a>
+                  <a href="mailto:concierge@malinaholidays.com">Email Concierge</a>
+                  <a onClick={() => setShowGeneralChat(true)}>Live Chat</a>
                 </div>
-                <div className="properties-grid">
-                  {baliVillas.map(villa => (
-                    <VillaCard key={villa.id} villa={villa} symbol="$" priceKey="priceUSD" />
-                  ))}
-                </div>
-              </div>
-            </section>
-
-            {/* ===== ITALY COLLECTION ===== */}
-            <section id="collection-italy" className="hp-villa-section">
-              <div className="hp-villa-inner">
-                <div className="section-header">
-                  <h2 className="section-title">Italy Collection</h2>
-                </div>
-                <div className="properties-grid">
-                  {italyVillas.map(villa => (
-                    <VillaCard key={villa.id} villa={villa} symbol="€" priceKey="priceEUR" />
-                  ))}
+                <div className="hp-quicklinks-col">
+                  <h4>Malina Holidays</h4>
+                  <p style={{ fontSize: "0.85rem", color: "var(--clr-grey-dark)", lineHeight: 1.6 }}>
+                    Curating exceptional villa experiences across India's most beautiful destinations since 2018.
+                  </p>
                 </div>
               </div>
+              <div className="hp-quicklinks-bottom">
+                <p>&copy; 2026 Malina Holidays. All rights reserved.</p>
+              </div>
             </section>
-
-            {/* ===== INDIA COLLECTION ===== */}
-            {indiaProps.length > 0 && (
-              <section className="hp-villa-section">
-                <div className="hp-villa-inner">
-                  <div className="section-header">
-                    <h2 className="section-title">India Collection</h2>
-                    <button className="view-all-btn" onClick={() => setActiveTab("explore")}>View All</button>
-                  </div>
-                  <div className="properties-grid">
-                    {indiaProps.map(prop => (
-                      <PropertyCard
-                        key={prop.id}
-                        property={prop}
-                        isFavorite={favorites.includes(prop.id)}
-                        onToggleFavorite={handleToggleFavorite}
-                        onViewDetails={setSelectedProperty}
-                        onOpenChat={setChatProperty}
-                      />
-                    ))}
-                  </div>
-                </div>
-              </section>
-            )}
-
-            {/* ===== INTERNATIONAL LUXURY ===== */}
-            {internationalProps.length > 0 && (
-              <section className="hp-villa-section">
-                <div className="hp-villa-inner">
-                  <div className="section-header">
-                    <h2 className="section-title">International Luxury</h2>
-                    <button className="view-all-btn" onClick={() => setActiveTab("explore")}>Explore All</button>
-                  </div>
-                  <div className="properties-grid">
-                    {internationalProps.map(prop => (
-                      <PropertyCard
-                        key={prop.id}
-                        property={prop}
-                        isFavorite={favorites.includes(prop.id)}
-                        onToggleFavorite={handleToggleFavorite}
-                        onViewDetails={setSelectedProperty}
-                        onOpenChat={setChatProperty}
-                      />
-                    ))}
-                  </div>
-                </div>
-              </section>
-            )}
           </>
         )}
 
@@ -696,6 +666,236 @@ export default function App() {
         }
         @media (min-width: 768px) {
           .chat-float-btn { bottom: 24px !important; }
+        }
+        /* ===== Section Containers ===== */
+        .hp-explore-section,
+        .hp-collections-section {
+          padding: 48px 20px;
+        }
+        .hp-explore-inner,
+        .hp-collections-inner {
+          max-width: 1200px;
+          margin: 0 auto;
+        }
+        @media (min-width: 1200px) {
+          .hp-explore-section,
+          .hp-collections-section {
+            padding: 60px 0;
+          }
+        }
+        @media (max-width: 600px) {
+          .hp-explore-section,
+          .hp-collections-section {
+            padding: 32px 16px;
+          }
+        }
+        /* ===== Destination Cards ===== */
+        .hp-destination-grid {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 16px;
+          margin-top: 20px;
+        }
+        .hp-destination-card {
+          position: relative;
+          border-radius: 16px;
+          overflow: hidden;
+          cursor: pointer;
+          transition: transform 0.3s ease, box-shadow 0.3s ease;
+          box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+        }
+        .hp-destination-card:hover {
+          transform: translateY(-4px);
+          box-shadow: 0 12px 28px rgba(0,0,0,0.12);
+        }
+        .hp-destination-image {
+          position: relative;
+          height: 220px;
+          overflow: hidden;
+        }
+        .hp-destination-image img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          transition: transform 0.5s ease;
+        }
+        .hp-destination-card:hover .hp-destination-image img {
+          transform: scale(1.05);
+        }
+        .hp-destination-overlay {
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(to top, rgba(11,26,48,0.8) 0%, transparent 60%);
+        }
+        .hp-destination-content {
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          padding: 20px;
+          color: #fff;
+          z-index: 2;
+        }
+        .hp-destination-content h3 {
+          font-size: 1.2rem;
+          font-weight: 700;
+          margin: 0 0 4px;
+        }
+        .hp-destination-content p {
+          font-size: 0.8rem;
+          opacity: 0.85;
+          margin: 0 0 8px;
+        }
+        .hp-destination-link {
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+          font-size: 0.8rem;
+          font-weight: 600;
+          color: var(--clr-gold);
+        }
+        @media (max-width: 600px) {
+          .hp-destination-grid { grid-template-columns: 1fr; }
+          .hp-destination-image { height: 180px; }
+        }
+        /* ===== Collections Gallery (mobile grid) ===== */
+        .hp-collections-gallery {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 10px;
+          margin-top: 20px;
+        }
+        .hp-collection-tile {
+          position: relative;
+          border-radius: 14px;
+          overflow: hidden;
+          cursor: pointer;
+          aspect-ratio: 1;
+          transition: transform 0.3s ease;
+        }
+        .hp-collection-tile:hover {
+          transform: scale(1.03);
+        }
+        .hp-collection-tile img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+        .hp-collection-tile-overlay {
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(to top, rgba(11,26,48,0.75), transparent 50%);
+          display: flex;
+          align-items: flex-end;
+          padding: 12px;
+        }
+        .hp-collection-tile-overlay span {
+          color: #fff;
+          font-weight: 700;
+          font-size: 0.8rem;
+          text-shadow: 0 1px 4px rgba(0,0,0,0.3);
+        }
+        @media (max-width: 600px) {
+          .hp-collections-gallery { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+          .hp-collection-tile { aspect-ratio: 4/3; border-radius: 10px; }
+          .hp-collection-tile-overlay span { font-size: 0.75rem; }
+        }
+        /* ===== Trending Carousel ===== */
+        .hp-trending-section {
+          padding: 40px 20px;
+          background-color: var(--clr-cream);
+        }
+        .hp-trending-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          max-width: 1200px;
+          margin: 0 auto 20px;
+        }
+        .trending-carousel-wrapper {
+          position: relative;
+          max-width: 1200px;
+          margin: 0 auto;
+        }
+        .trending-carousel {
+          display: flex;
+          gap: 20px;
+          overflow-x: auto;
+          scroll-snap-type: x mandatory;
+          -webkit-overflow-scrolling: touch;
+          padding: 8px 4px;
+          scrollbar-width: none;
+        }
+        .trending-carousel::-webkit-scrollbar { display: none; }
+        .trending-slide {
+          scroll-snap-align: start;
+          flex-shrink: 0;
+        }
+        .trending-scroll-btn {
+          position: absolute;
+          top: 50%;
+          transform: translateY(-50%);
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          background: var(--clr-white);
+          border: 1px solid var(--clr-light-grey);
+          box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 5;
+          transition: all 0.2s ease;
+        }
+        .trending-scroll-btn:hover { background: var(--clr-gold); color: #fff; border-color: var(--clr-gold); }
+        .trending-scroll-left { left: -12px; }
+        .trending-scroll-right { right: -12px; }
+        @media (max-width: 600px) {
+          .trending-scroll-btn { display: none !important; }
+          .hp-trending-section { padding: 24px 16px; }
+        }
+        /* ===== Quick Links ===== */
+        .hp-quicklinks-section {
+          background: var(--clr-navy);
+          color: var(--clr-white);
+          padding: 48px 20px 24px;
+        }
+        .hp-quicklinks-inner {
+          max-width: 1200px;
+          margin: 0 auto;
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 32px;
+        }
+        .hp-quicklinks-col h4 {
+          color: var(--clr-gold);
+          font-size: 1rem;
+          margin: 0 0 16px;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+        }
+        .hp-quicklinks-col a {
+          display: block;
+          color: rgba(255,255,255,0.7);
+          text-decoration: none;
+          font-size: 0.9rem;
+          padding: 4px 0;
+          cursor: pointer;
+          transition: color 0.2s;
+        }
+        .hp-quicklinks-col a:hover { color: var(--clr-gold); }
+        .hp-quicklinks-bottom {
+          max-width: 1200px;
+          margin: 32px auto 0;
+          padding-top: 20px;
+          border-top: 1px solid rgba(255,255,255,0.1);
+          text-align: center;
+          font-size: 0.8rem;
+          color: rgba(255,255,255,0.4);
+        }
+        @media (max-width: 600px) {
+          .hp-quicklinks-inner { grid-template-columns: repeat(2, 1fr); gap: 24px; }
         }
       `}</style>
     </div>
