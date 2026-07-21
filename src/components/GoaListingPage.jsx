@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { ArrowLeft, MapPin, Star, ChevronRight } from "lucide-react";
+import { ArrowLeft, MapPin, Star, ChevronRight, MessageCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { goaVillas } from "../data/goaVillas";
 import VillaDetailPage from "./VillaDetailPage";
@@ -41,13 +41,26 @@ const VillaCard = ({ villa, onClick }) => (
           </>
         )}
       </div>
-      <div className="card-footer">
+        <div className="card-footer">
         <div className="card-price-container">
           <span className="price-label">Starting From</span>
           <span className="price-val">₹{villa.priceINR?.toLocaleString("en-IN")}</span>
           <span className="price-sub">/night</span>
         </div>
-        <button className="view-property-btn">View Details</button>
+        <div className="card-actions">
+          <button className="view-property-btn">View Details</button>
+          <a
+            href="https://wa.me/919315572283"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="chat-shortcut-btn"
+            aria-label={`Contact about ${villa.name} on WhatsApp`}
+            style={{ textDecoration: "none", display: "flex" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <MessageCircle size={18} />
+          </a>
+        </div>
       </div>
     </div>
   </div>

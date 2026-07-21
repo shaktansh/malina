@@ -309,16 +309,16 @@ export default function VillaDetailPage({ villa, onBack }) {
               Interested in booking {villa.name}? Our luxury travel advisors are on hand to craft your perfect escape.
             </p>
             <div className="villa-contact-methods">
-              <a href="tel:+918430600600" className="villa-contact-btn villa-contact-primary">
+              <a href="tel:+919315572283" className="villa-contact-btn villa-contact-primary">
                 <Phone size={18} />
-                <span>+91 84306 00600</span>
+                <span>+91 93155 72283</span>
               </a>
               <a href="mailto:concierge@malinaholidays.com" className="villa-contact-btn villa-contact-secondary">
                 <Mail size={18} />
                 <span>Email Concierge</span>
               </a>
               <a
-                href="https://wa.me/918430600600"
+                href="https://wa.me/919315572283"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="villa-contact-btn villa-contact-whatsapp"

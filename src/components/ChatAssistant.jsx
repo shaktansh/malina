@@ -65,7 +65,7 @@ export default function ChatAssistant({ property, onClose, onAddBooking }) {
       } else if (lowerText.includes("hello") || lowerText.includes("hi") || lowerText.includes("hey")) {
         botResponse = "Hello! How can I assist you with your luxury travel arrangements today?";
       } else {
-        botResponse = "I would be delighted to arrange that for you. At Malina Holidays, we pride ourselves on bespoke luxury. If you'd like to book one of our properties, please select 'View Property' on the homepage to access the direct booking calendar, or tell me your preferred destination so I can make a suggestion!";
+        botResponse = "I would be delighted to arrange that for you. At Malina Holidays, we pride ourselves on bespoke luxury. If you'd like to book one of our properties, please select 'View Property' on the homepage to access the direct booking calendar, or tell me your preferred destination so I can make a suggestion! You can also reach us directly on WhatsApp at [wa.me/919315572283](https://wa.me/919315572283) or call +91 93155 72283.";
       }
 
       setIsTyping(false);

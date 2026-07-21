@@ -465,8 +465,9 @@ export default function App() {
                 </div>
                 <div className="hp-quicklinks-col">
                   <h4>Support</h4>
-                  <a href="tel:+918430600600">+91 84306 00600</a>
+                  <a href="tel:+919315572283">+91 93155 72283</a>
                   <a href="mailto:concierge@malinaholidays.com">Email Concierge</a>
+                  <a href="https://wa.me/919315572283" target="_blank" rel="noopener noreferrer">WhatsApp</a>
                   <a onClick={() => setShowGeneralChat(true)}>Live Chat</a>
                 </div>
                 <div className="hp-quicklinks-col">

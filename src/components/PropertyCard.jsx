@@ -1,5 +1,5 @@
 import React from "react";
-import { Star, MapPin, Heart, MessageSquare } from "lucide-react";
+import { Star, MapPin, Heart, MessageSquare, MessageCircle } from "lucide-react";
 
 export default function PropertyCard({ 
   property, 
@@ -118,13 +118,16 @@ export default function PropertyCard({
             >
               View Property
             </button>
-            <button 
+            <a 
+              href="https://wa.me/919315572283"
+              target="_blank"
+              rel="noopener noreferrer"
               className="chat-shortcut-btn"
-              onClick={() => onOpenChat(property)}
-              aria-label={`Ask about ${name}`}
+              aria-label={`Contact about ${name} on WhatsApp`}
+              style={{ textDecoration: "none", display: "flex" }}
             >
-              <MessageSquare size={18} />
-            </button>
+              <MessageCircle size={18} />
+            </a>
           </div>
         </div>
       </div>
